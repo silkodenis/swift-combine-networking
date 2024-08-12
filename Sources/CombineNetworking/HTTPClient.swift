@@ -53,26 +53,21 @@ public final class HTTPClient {
     /// A session conforming to `HTTPSession` for handling requests.
     private let session: HTTPSession
     
-    /// A dispatch queue on which the results will be received.
-    /// This queue determines where the completion of the HTTP request and the processing of the response will occur.
-    /// By default, it is set to the main queue.
-    private let queue: DispatchQueue
-    
     /// Initializes a new HTTPClient with the given JSON decoder and session.
     /// - Parameters:
     ///   - jsonDecoder: A `JSONDecoder` to use for decoding the response data.
     ///   - session: An `HTTPSession` for sending requests and receiving responses.
-    ///   - queue: A `DispatchQueue` on which to receive the results. Defaults to the main queue.
-    public init(jsonDecoder: JSONDecoder, session: HTTPSession, queue: DispatchQueue = .main) {
+    public init(jsonDecoder: JSONDecoder, session: HTTPSession) {
         self.decoder = jsonDecoder
         self.session = session
-        self.queue = queue
     }
     
     /// Executes a request and decodes the response.
-    /// - Parameter request: The `URLRequest` to execute.
+    /// - Parameters:
+    ///    - request: The `URLRequest` to execute.
+    ///    - queue:  A `DispatchQueue` on which to receive the results. Defaults to the main queue.
     /// - Returns: A publisher that emits the decoded response or an error.
-    public func execute<T: Decodable>(_ request: URLRequest) -> AnyPublisher<T, Error> {
+    public func execute<T: Decodable>(_ request: URLRequest, queue: DispatchQueue = .main) -> AnyPublisher<T, Error> {
         return session
             .dataTask(for: request)
             .tryMap { data, response in

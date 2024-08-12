@@ -47,15 +47,13 @@ public final class HTTPRequestBuilder<T: HTTPEndpoint> {
         }
     }
     
-    // MARK: - Private
-    
     /// Constructs a URLRequest with provided endpoint and data.
     /// - Parameters:
     ///   - endpoint: The endpoint containing all necessary information to build the URL.
     ///   - data: Optional Codable data to be included as the HTTP body.
     /// - Throws: An error if the URL cannot be constructed or the data cannot be encoded.
     /// - Returns: A configured URLRequest ready to be executed.
-    private func buildRequest(for endpoint: T, with data: Codable? = nil) throws -> URLRequest {
+    public func buildRequest(for endpoint: T, with data: Codable? = nil) throws -> URLRequest {
         let url = endpoint.baseURL.appendingPathComponent(endpoint.path)
         
         guard let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: true)?
