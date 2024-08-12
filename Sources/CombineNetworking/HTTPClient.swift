@@ -53,13 +53,20 @@ public final class HTTPClient {
     /// A session conforming to `HTTPSession` for handling requests.
     private let session: HTTPSession
     
+    /// A dispatch queue on which the results will be received.
+    /// This queue determines where the completion of the HTTP request and the processing of the response will occur.
+    /// By default, it is set to the main queue.
+    private let queue: DispatchQueue
+    
     /// Initializes a new HTTPClient with the given JSON decoder and session.
     /// - Parameters:
     ///   - jsonDecoder: A `JSONDecoder` to use for decoding the response data.
     ///   - session: An `HTTPSession` for sending requests and receiving responses.
-    public init(jsonDecoder: JSONDecoder, session: HTTPSession) {
+    ///   - queue: A `DispatchQueue` on which to receive the results. Defaults to the main queue.
+    public init(jsonDecoder: JSONDecoder, session: HTTPSession, queue: DispatchQueue = .main) {
         self.decoder = jsonDecoder
         self.session = session
+        self.queue = queue
     }
     
     /// Executes a request and decodes the response.
@@ -74,7 +81,7 @@ public final class HTTPClient {
             }
             .decode(type: T.self, decoder: decoder)
             .mapError(Self.mapError)
-            .receive(on: DispatchQueue.main)
+            .receive(on: queue)
             .eraseToAnyPublisher()
     }
 }
