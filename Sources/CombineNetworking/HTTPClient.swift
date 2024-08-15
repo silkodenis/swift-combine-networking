@@ -65,9 +65,8 @@ public final class HTTPClient {
     /// Executes a request and decodes the response.
     /// - Parameters:
     ///    - request: The `URLRequest` to execute.
-    ///    - queue:  A `DispatchQueue` on which to receive the results. Defaults to the main queue.
     /// - Returns: A publisher that emits the decoded response or an error.
-    public func execute<T: Decodable>(_ request: URLRequest, queue: DispatchQueue = .main) -> AnyPublisher<T, Error> {
+    public func execute<T: Decodable>(_ request: URLRequest) -> AnyPublisher<T, Error> {
         return session
             .dataTask(for: request)
             .tryMap { data, response in
@@ -76,7 +75,7 @@ public final class HTTPClient {
             }
             .decode(type: T.self, decoder: decoder)
             .mapError(Self.mapError)
-            .receive(on: queue)
+            .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }
 }
