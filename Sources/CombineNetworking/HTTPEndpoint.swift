@@ -53,4 +53,9 @@ public protocol HTTPEndpoint {
     /// Optional dictionary of parameters to be included in the request.
     /// These parameters may be used in the query string for GET requests or in the request body for POST requests.
     var parameters: [String: Any]? { get }
+    
+    /// The timeout interval for the request, in seconds.
+    /// This defines how long the client should wait for a response from the server before timing out.
+    /// If the request exceeds this duration without a response, it will fail with a timeout error.
+    var timeout: TimeInterval { get }
 }

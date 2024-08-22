@@ -64,6 +64,7 @@ public final class HTTPRequestBuilder<T: HTTPEndpoint> {
         var request = URLRequest(url: finalURL)
         request.httpMethod = endpoint.method.rawValue
         request.allHTTPHeaderFields = endpoint.headers
+        request.timeoutInterval = endpoint.timeout
 
         if let data = data {
             request.httpBody = try jsonEncoder.encode(data)

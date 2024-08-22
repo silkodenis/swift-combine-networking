@@ -122,6 +122,10 @@ extension Endpoint: HTTPEndpoint {
             return nil
         }
     }
+    
+    var timeout: TimeInterval {
+        return 30
+    }
 }
 ```
 </details>

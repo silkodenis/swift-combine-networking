@@ -64,6 +64,10 @@ extension MoviesEndpoint: HTTPEndpoint {
     var parameters: [String: Any]? {
         return ["api_key": Self.apiKey]
     }
+    
+    var timeout: TimeInterval {
+        return 30
+    }
 }
 
 // MARK: - Inner Types
