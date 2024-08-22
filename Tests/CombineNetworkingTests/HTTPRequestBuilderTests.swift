@@ -205,6 +205,7 @@ extension HTTPRequestBuilderTests {
         var method: HTTPMethod { return _method }
         var headers: [String : String]? { return _headers }
         var parameters: [String : Any]? { return _parameters }
+        var timeout: TimeInterval { 30 }
     }
     
 }
