@@ -75,6 +75,7 @@ public final class HTTPClient {
             }
             .decode(type: T.self, decoder: decoder)
             .mapError(Self.mapError)
+            .subscribe(on: DispatchQueue.global(qos: .utility))
             .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }
