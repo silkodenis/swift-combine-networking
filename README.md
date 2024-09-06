@@ -32,30 +32,6 @@ To add CombineNetworking to your project in Xcode:
 4. Choose the version you want to use (you can specify a version, a commit, or a branch).
 5. Click `Next` and Xcode will download the package and add it to your project.
 
-### Using Swift Package Manager from the Command Line
-
-If you are managing your Swift packages manually or through a package.swift file, add CombineNetworking as a dependency:
-
-1. Open your `Package.swift`.
-2. Add `CombineNetworking` to your package's dependencies:
-
-```swift
-let package = Package(
-    name: "YourProjectName",
-    dependencies: [
-        .package(url: "https://github.com/silkodenis/swift-combine-networking.git", .upToNextMajor(from: "1.0.0"))
-    ],
-    targets: [
-        .target(
-            name: "YourTargetName",
-            dependencies: ["CombineNetworking"]
-        )
-    ]
-)
-```
-
-This setup specifies that CombineNetworking should be pulled from the master branch and included in the YourTargetName target of your project.
-
 ## Components
 
 - **[HTTPSession](https://github.com/silkodenis/swift-combine-networking/blob/main/Sources/CombineNetworking/HTTPSession.swift) Protocol**: Allows for mocking of session behavior in unit tests, making it easier to test network interactions.
