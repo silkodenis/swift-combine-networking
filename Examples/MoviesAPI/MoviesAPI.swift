@@ -34,7 +34,7 @@ class MoviesAPIService: MoviesAPI {
     
     func authentication() -> AnyPublisher<TokenDTO, Error> {
         builder.request(.authentication)
-            .flatMap(client.execute)
+            .flatMap(client.executeJsonRequest)
             .eraseToAnyPublisher()
     }
     
@@ -42,43 +42,43 @@ class MoviesAPIService: MoviesAPI {
         builder.request(.validation, with: Login(username: username,
                                                  password: password,
                                             request_token: token))
-        .flatMap(client.execute)
+        .flatMap(client.executeJsonRequest)
         .eraseToAnyPublisher()
     }
     
     func session(with token: String) -> AnyPublisher<SessionDTO, Error> {
         builder.request(.session, with: Token(request_token: token))
-            .flatMap(client.execute)
+            .flatMap(client.executeJsonRequest)
             .eraseToAnyPublisher()
     }
     
     func guestSession() -> AnyPublisher<SessionDTO, Error> {
         builder.request(.guestSession)
-            .flatMap(client.execute)
+            .flatMap(client.executeJsonRequest)
             .eraseToAnyPublisher()
     }
     
     func deleteSession(with id: String) -> AnyPublisher<SessionDTO, Error> {
         builder.request(.deleteSession, with: Session(session_id: id))
-            .flatMap(client.execute)
+            .flatMap(client.executeJsonRequest)
             .eraseToAnyPublisher()
     }
     
     func configuration() -> AnyPublisher<ConfigurationDTO, Error> {
         builder.request(.configuration)
-            .flatMap(client.execute)
+            .flatMap(client.executeJsonRequest)
             .eraseToAnyPublisher()
     }
     
     func trending() -> AnyPublisher<PageDTO<MovieDTO>, Error> {
         builder.request(.trending(.week))
-            .flatMap(client.execute)
+            .flatMap(client.executeJsonRequest)
             .eraseToAnyPublisher()
     }
     
     func movieDetail(id: Int) -> AnyPublisher<MovieDetailDTO, Error> {
         builder.request(.movieDetail(id: id))
-            .flatMap(client.execute)
+            .flatMap(client.executeJsonRequest)
             .eraseToAnyPublisher()
     }
 }

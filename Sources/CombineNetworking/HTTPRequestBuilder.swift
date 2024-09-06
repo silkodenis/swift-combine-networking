@@ -24,8 +24,8 @@ public final class HTTPRequestBuilder<T: HTTPEndpoint> {
     private let jsonEncoder: JSONEncoder
     
     /// Initializes a new HTTPRequestBuilder with the given JSON encoder.
-    /// - Parameter jsonEncoder: A `JSONEncoder` used to encode the data to be sent in network requests.
-    public init(jsonEncoder: JSONEncoder) {
+    /// - Parameter jsonEncoder: A `JSONEncoder` used to encode the data to be sent in network requests. Defaults to a new instance of `JSONEncoder()`.
+    public init(jsonEncoder: JSONEncoder = JSONEncoder()) {
         self.jsonEncoder = jsonEncoder
     }
 
@@ -65,7 +65,7 @@ public final class HTTPRequestBuilder<T: HTTPEndpoint> {
         request.httpMethod = endpoint.method.rawValue
         request.allHTTPHeaderFields = endpoint.headers
         request.timeoutInterval = endpoint.timeout
-
+        
         if let data = data {
             request.httpBody = try jsonEncoder.encode(data)
         }
@@ -87,8 +87,10 @@ fileprivate extension URLComponents {
             if let value = value as? CustomStringConvertible {
                 return URLQueryItem(name: key, value: value.description)
             }
+            
             return nil
         }
+        
         return copy
     }
 }

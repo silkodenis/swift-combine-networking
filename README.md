@@ -143,7 +143,7 @@ let client = HTTPClient(jsonDecoder: JSONDecoder(), session: URLSession.shared)
 
 func fetchUser(id: Int) -> AnyPublisher<UserDataDTO, Error> {
         builder.request(.fetchUser(id: id))
-            .flatMap(client.execute)
+            .flatMap(client.executeJsonRequest)
             .eraseToAnyPublisher()
 }
 ```

@@ -14,7 +14,7 @@ final class HTTPClientTests: XCTestCase {
     func testInvalidHTTPResponseStatus() throws {
         struct MockSession: HTTPSession {
             func dataTask(for request: URLRequest) -> AnyPublisher<HTTPResponse, URLError> {
-                let response = HTTPURLResponse(url: request.url!, statusCode: 404, httpVersion: nil, 
+                let response = HTTPURLResponse(url: request.url!, statusCode: 404, httpVersion: nil,
                                                headerFields: ["Content-Type": "application/json"])!
                 return Result.Publisher((data: Data(), response: response)).eraseToAnyPublisher()
             }
@@ -25,7 +25,7 @@ final class HTTPClientTests: XCTestCase {
         let request = URLRequest(url: requestURL)
         let expectation = XCTestExpectation(description: "Invalid response status test")
 
-        let cancellable = sut.execute(request)
+        let cancellable = sut.executeJsonRequest(request)
             .sink(receiveCompletion: { completion in
                 if case .failure(let error) = completion {
                     if let httpClientError = error as? HTTPClientError,
@@ -71,7 +71,7 @@ final class HTTPClientTests: XCTestCase {
         let request = URLRequest(url: URL(string: "https://example.com")!)
         let expectation = XCTestExpectation(description: "Successful data fetch")
 
-        let cancellable = sut.execute(request)
+        let cancellable = sut.executeJsonRequest(request)
             .sink(receiveCompletion: { completion in
                 if case .failure = completion {
                     XCTFail("Request failed when success was expected")
@@ -81,6 +81,62 @@ final class HTTPClientTests: XCTestCase {
                 expectation.fulfill()
             })
 
+        wait(for: [expectation], timeout: 5.0)
+        cancellable.cancel()
+    }
+    
+    func testSuccessfulDataRequest() throws {
+        struct MockSession: HTTPSession {
+            func dataTask(for request: URLRequest) -> AnyPublisher<HTTPResponse, URLError> {
+                let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+                let mockData = "Test data".data(using: .utf8)!
+                return Result.Publisher((data: mockData, response: response)).eraseToAnyPublisher()
+            }
+        }
+        
+        let sut = HTTPClient(session: MockSession())
+        let request = URLRequest(url: URL(string: "https://example.com")!)
+        let expectation = XCTestExpectation(description: "Successful data request")
+        
+        let cancellable = sut.executeDataRequest(request)
+            .sink(receiveCompletion: { completion in
+                if case .failure = completion {
+                    XCTFail("Expected success, but request failed")
+                }
+            }, receiveValue: { data in
+                XCTAssertEqual(String(data: data, encoding: .utf8), "Test data", "Expected correct data to be returned")
+                expectation.fulfill()
+            })
+        
+        wait(for: [expectation], timeout: 5.0)
+        cancellable.cancel()
+    }
+    
+    func testDataRequestServerError() throws {
+        struct MockSession: HTTPSession {
+            func dataTask(for request: URLRequest) -> AnyPublisher<HTTPResponse, URLError> {
+                let response = HTTPURLResponse(url: request.url!, statusCode: 404, httpVersion: nil, headerFields: nil)!
+                return Result.Publisher((data: Data(), response: response)).eraseToAnyPublisher()
+            }
+        }
+        
+        let sut = HTTPClient(session: MockSession())
+        let request = URLRequest(url: URL(string: "https://example.com")!)
+        let expectation = XCTestExpectation(description: "Server error handling test")
+        
+        let cancellable = sut.executeDataRequest(request)
+            .sink(receiveCompletion: { completion in
+                if case .failure(let error) = completion, let httpClientError = error as? HTTPClientError,
+                   case .invalidResponse(let details) = httpClientError {
+                    XCTAssertEqual(details.statusCode, 404, "Expected status code 404")
+                    expectation.fulfill()
+                } else {
+                    XCTFail("Expected HTTPClientError.invalidResponse with status code 404")
+                }
+            }, receiveValue: { _ in
+                XCTFail("Expected failure due to server error, but received data")
+            })
+        
         wait(for: [expectation], timeout: 5.0)
         cancellable.cancel()
     }
@@ -96,9 +152,9 @@ final class HTTPClientTests: XCTestCase {
         let request = URLRequest(url: URL(string: "https://example.com")!)
         let expectation = XCTestExpectation(description: "Network error handling test")
 
-        let cancellable = sut.execute(request)
+        let cancellable = sut.executeJsonRequest(request)
             .sink(receiveCompletion: { completion in
-                if case .failure(let error) = completion, let httpClientError = error as? HTTPClientError, 
+                if case .failure(let error) = completion, let httpClientError = error as? HTTPClientError,
                     case .networkError(let error) = httpClientError {
                     let urlError = error as? URLError
                     XCTAssertEqual(urlError?.code, .notConnectedToInternet)
@@ -127,7 +183,7 @@ final class HTTPClientTests: XCTestCase {
         let request = URLRequest(url: URL(string: "https://example.com")!)
         let expectation = XCTestExpectation(description: "Invalid JSON decoding test")
 
-        let cancellable = sut.execute(request)
+        let cancellable = sut.executeJsonRequest(request)
             .sink(receiveCompletion: { completion in
                 if case .failure = completion {
                     expectation.fulfill()
@@ -157,7 +213,7 @@ final class HTTPClientTests: XCTestCase {
         let request = URLRequest(url: URL(string: "https://example.com")!)
         let expectation = XCTestExpectation(description: "Decoding error handling test")
 
-        let cancellable = sut.execute(request)
+        let cancellable = sut.executeJsonRequest(request)
             .sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished:

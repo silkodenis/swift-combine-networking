@@ -55,25 +55,41 @@ public final class HTTPClient {
     
     /// Initializes a new HTTPClient with the given JSON decoder and session.
     /// - Parameters:
-    ///   - jsonDecoder: A `JSONDecoder` to use for decoding the response data.
-    ///   - session: An `HTTPSession` for sending requests and receiving responses.
-    public init(jsonDecoder: JSONDecoder, session: HTTPSession) {
+    ///   - jsonDecoder: A `JSONDecoder` to use for decoding the response data. Defaults to a new instance of `JSONDecoder()`.
+    ///   - session: An `HTTPSession` for sending requests and receiving responses. Defaults to a new instance of `URLSession.shared`.
+    public init(jsonDecoder: JSONDecoder = JSONDecoder(), session: HTTPSession = URLSession.shared) {
         self.decoder = jsonDecoder
         self.session = session
     }
     
     /// Executes a request and decodes the response.
-    /// - Parameters:
-    ///    - request: The `URLRequest` to execute.
+    /// - Parameter request: The `URLRequest` to execute.
     /// - Returns: A publisher that emits the decoded response or an error.
-    public func execute<T: Decodable>(_ request: URLRequest) -> AnyPublisher<T, Error> {
+    public func executeJsonRequest<T: Decodable>(_ request: URLRequest) -> AnyPublisher<T, Error> {
+        return performRequest(request)
+            .decode(type: T.self, decoder: decoder)
+            .mapError(Self.mapError)
+            .eraseToAnyPublisher()
+    }
+    
+    /// Executes a request and returns the raw data.
+    /// - Parameter request: The request to execute.
+    /// - Returns: A publisher that emits the response data or an error.
+    public func executeDataRequest(_ request: URLRequest) -> AnyPublisher<Data, Error> {
+        return performRequest(request)
+            .eraseToAnyPublisher()
+    }
+    
+    /// Performs the HTTP request and validates the response.
+    /// - Parameter request: The `URLRequest` to execute.
+    /// - Returns: A publisher that emits the response data or an error after validating the HTTP response.
+    private func performRequest(_ request: URLRequest) -> AnyPublisher<Data, Error> {
         return session
             .dataTask(for: request)
             .tryMap { data, response in
                 try Self.validateResponse(response, for: request)
                 return data
             }
-            .decode(type: T.self, decoder: decoder)
             .mapError(Self.mapError)
             .subscribe(on: DispatchQueue.global(qos: .utility))
             .receive(on: DispatchQueue.main)
@@ -123,4 +139,3 @@ fileprivate extension HTTPClient {
         }
     }
 }
-
