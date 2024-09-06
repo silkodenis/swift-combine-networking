@@ -208,6 +208,7 @@ let real = HTTPClient(jsonDecoder: JSONDecoder(), session: URLSession.shared)
 
 ## Examples
 [MoviesAPI Service](https://github.com/silkodenis/swift-combine-networking/tree/main/Examples/MoviesAPI)
+[SwiftUI App](https://github.com/silkodenis/swiftui-moviesdb-redux-app)
 
 ## Contributing
 
